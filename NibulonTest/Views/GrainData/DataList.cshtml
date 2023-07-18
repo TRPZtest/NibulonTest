@@ -1,0 +1,131 @@
+﻿@model IEnumerable<NibulonTest.Models.GrainDataRecord>
+
+@{
+    ViewData["Title"] = "Test task";
+}
+
+
+@using (Html.BeginForm("GetReport", "GrainData", FormMethod.Get, new { begin = "begin", end = "end" }))
+{
+    <div class="row">
+        <div class="col-md-2">
+            <label for="beginDate">З:</label>
+        </div>
+        <div class="col-md-2">
+            <label for="endDate">По(необов'язково):</label>
+        </div>               
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <input id="beginDate" type="date" width="10" class="date" name="begin" required />
+        </div>
+        <div class="col-md-2">
+            <input id="endDate" type="date" width="10" class="date" name="end" />
+        </div>
+        <div class="col-1">
+            <input type="submit" value="Отримати згруповані данні" />
+       </div>                   
+    </div>   
+}
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RecordDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UnitCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HarvestYear)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CounterpartyId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TreatyId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TMCcode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NetQuantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Direction)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Moisture)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Trash)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Infection)
+            </th>           
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RecordDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UnitCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HarvestYear)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CounterpartyId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TreatyId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TMCcode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NetQuantity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Direction)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Moisture)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Trash)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Infection)
+            </td>           
+            <td>
+                @Html.ActionLink("Редагувати", "Edit", new {  id = item.Id  }) |           
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

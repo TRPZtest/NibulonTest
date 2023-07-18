@@ -10,14 +10,15 @@ namespace NibulonTest.Services
     {
         private readonly string _filePath;
 
-        public GrainDataService(string filePath) 
+        public GrainDataService() 
         {
-            filePath = "Task.xlsx";
+            var filePath = "C:\\Users\\DV\\Desktop\\Task.xlsx";
             _filePath = filePath;
         }
+
         public List<GrainDataRecord> GetGrainDataRecords()
         {
-            var excel = new ExcelQueryFactory(_filePath);
+            using var excel = new ExcelQueryFactory(_filePath);
 
             var test = excel.GetColumnNames("Таблиця_1");
 
@@ -26,12 +27,34 @@ namespace NibulonTest.Services
             return inputWorksheet;
         }
 
+        public List<GrainDataRecord> GetGrainDataRecordsById(int id)
+        {
+            using var excel = new ExcelQueryFactory(_filePath);
+
+            var test = excel.GetColumnNames("Таблиця_1");
+
+            var data = excel.Worksheet<GrainDataRecord>("Таблиця_1").Where(x => x.Id == id);
+
+            return data.ToList(); //to not return null we should return list
+        }
+
+        public List<GrainDataRecord> GetGrainDataRecordsByDate(DateTime begin, DateTime end)
+        {
+            using var excel = new ExcelQueryFactory(_filePath);
+
+            var test = excel.GetColumnNames("Таблиця_1");
+
+            var data = excel.Worksheet<GrainDataRecord>("Таблиця_1").Where(x => x.RecordDate >= begin && x.RecordDate <= end);
+
+            return data.ToList(); //to not return null we should return list
+        }
+
         public bool UpdateDataGrainRecord(GrainDataRecord record)
         {
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             bool wasChanged = false;
             FileInfo file = new FileInfo(_filePath);
-            ExcelPackage excelPackage = new(file);
+            using ExcelPackage excelPackage = new(file);
 
             var worksheet = excelPackage.Workbook.Worksheets["Таблиця_1"];
 
@@ -69,22 +92,98 @@ namespace NibulonTest.Services
             return wasChanged;
         }
 
-        public void WriteGroupedDataReport(List<GroupedDataRecord> records)
+        public List<GroupedDataRecord> GetGroupedDataRecords(List<GrainDataRecord> data)
         {
-            WriteReport(records, "Таблиця_2", 2, 1);      
+            var groupedData = from record in data
+                      group record by new
+                      {
+                          record.RecordDate,
+                          record.CounterpartyId,
+                          record.Name,
+                          record.TreatyId,
+                          record.TMCcode,
+                          record.Direction,
+                          record.Moisture,
+                          record.InfectionDecimal,
+                          record.Trash
+                      } into gcs
+                      select new GroupedDataRecord()
+                      {
+                          RecordDate = gcs.Key.RecordDate,
+                          CounterpartyId = gcs.Key.CounterpartyId,
+                          Name = gcs.Key.Name,
+                          TreatyId = gcs.Key.TreatyId,
+                          TMCcode = gcs.Key.TMCcode,
+                          Direction = gcs.Key.Direction,
+                          Price = gcs.Average(x => x.Price),
+                          NetQuantity = gcs.Sum(x => x.NetQuantity),
+                          Moisture = gcs.Key.Moisture,
+                          Trash = gcs.Key.Trash,
+                          InfectionDecimal = gcs.Key.InfectionDecimal
+                      };
+
+            return groupedData.ToList();
         }
 
-        public void WriteGroupedAvgDataReport(List<GroupedDataRecord> records)
+        public List<GroupedDataRecord> GetGroupedAvgDataRecords(List<GrainDataRecord> data)
         {
-            WriteReport(records, "Таблиця_3", 3, 1);           
+            var avg = from record in data
+                      group record by new
+                      {
+                          record.RecordDate,
+                          record.CounterpartyId,
+                          record.Name,
+                          record.TreatyId,
+                          record.TMCcode,
+                          record.Direction
+                      } into gcs
+                      select new GroupedDataRecord()
+                      {
+                          RecordDate = gcs.Key.RecordDate,
+                          CounterpartyId = gcs.Key.CounterpartyId,
+                          Name = gcs.Key.Name,
+                          TreatyId = gcs.Key.TreatyId,
+                          TMCcode = gcs.Key.TMCcode,
+                          Direction = gcs.Key.Direction,
+                          Price = gcs.Average(x => x.Price),
+                          NetQuantity = gcs.Sum(x => x.NetQuantity),
+                          Moisture = gcs.Average(x => x.Moisture),
+                          Trash = gcs.Average(x => x.Trash),
+                          InfectionDecimal = gcs.Average(x => x.InfectionDecimal)
+                      };
+
+            return avg.ToList();
         }
 
-        private void WriteReport(List<GroupedDataRecord> records, string sheetName, int x, int y)
+        public async Task<byte[]> GetReportFile(DateTime begin, DateTime end)
         {
+            var data = GetGrainDataRecordsByDate(begin, end);
+
+            var groupedData = GetGroupedDataRecords(data);
+
+            var groupedAvgData = GetGroupedAvgDataRecords(data);
+
+            using FileStream fileStream = File.OpenRead(_filePath);
+            using MemoryStream memoryStream = new MemoryStream();
+
+            await fileStream.CopyToAsync(memoryStream);
+
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-            FileInfo file = new FileInfo(_filePath);
-            using ExcelPackage excelPackage = new ExcelPackage(file);
 
+            using ExcelPackage excelPackage = new ExcelPackage(memoryStream);
+
+
+            WriteReport(excelPackage, groupedData, "Таблиця_2", 2, 1);
+
+            WriteReport(excelPackage, groupedAvgData, "Таблиця_3", 3, 1);
+
+            return await excelPackage.GetAsByteArrayAsync();
+        }
+
+        
+     
+        private void WriteReport(ExcelPackage excelPackage, List<GroupedDataRecord> records, string sheetName, int x, int y)
+        {
             var worksheet = excelPackage.Workbook.Worksheets[sheetName];
 
             worksheet.Cells[x, y].Clear();
