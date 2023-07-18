@@ -9,7 +9,7 @@ namespace NibulonTest.Models
     {   
         [ExcelColumn("Номер _запису")]
         [DisplayName("Номер _запису")]
-        public long Id { get; set; }
+        public int Id { get; set; }
         [ExcelColumn("Дата обліку")]
         [DisplayName("Дата обліку")]
         public DateTime RecordDate { get; set; }
@@ -54,7 +54,7 @@ namespace NibulonTest.Models
         {
             get
             {
-                var success = decimal.TryParse(new String(Infection?.Where(x => char.IsDigit(x)).ToArray()), out var value);
+                var success = decimal.TryParse(Infection?.Replace("ст", ""), out var value);
                 if (success)
                     return value;
                 else

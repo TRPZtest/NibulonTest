@@ -35,7 +35,7 @@ namespace NibulonTest.Models
         {
             get
             {
-                var success = decimal.TryParse(new String(Infection?.Where(x => char.IsDigit(x)).ToArray()), out var value);
+                var success = decimal.TryParse(Infection?.Replace("ст", ""), out var value);
                 if (success)
                     return value;
                 else

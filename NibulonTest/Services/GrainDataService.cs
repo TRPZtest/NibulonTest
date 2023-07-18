@@ -33,9 +33,9 @@ namespace NibulonTest.Services
 
             var test = excel.GetColumnNames("Таблиця_1");
 
-            var data = excel.Worksheet<GrainDataRecord>("Таблиця_1").Where(x => x.Id == id);
+            var data = excel.Worksheet<GrainDataRecord>("Таблиця_1").Where(x => x.Id == id).ToList();
 
-            return data.ToList(); //to not return null we should return list
+            return data; //to not return null we should return list
         }
 
         public List<GrainDataRecord> GetGrainDataRecordsByDate(DateTime begin, DateTime end)
