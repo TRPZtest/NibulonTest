@@ -12,7 +12,7 @@ namespace NibulonTest.Services
 
         public GrainDataService() 
         {
-            var filePath = "C:\\Users\\DV\\Desktop\\Task.xlsx";
+            var filePath = "Task.xlsx";
             _filePath = filePath;
         }
 

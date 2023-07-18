@@ -9,9 +9,9 @@ namespace NibulonTest.Controllers
     {
         private readonly GrainDataService _grainDataService;
 
-        public GrainDataController()
+        public GrainDataController(GrainDataService grainDataService)
         {
-            _grainDataService = new GrainDataService();
+            _grainDataService = grainDataService;
         }
         public IActionResult DataList()
         {
