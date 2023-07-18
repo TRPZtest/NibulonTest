@@ -15,7 +15,7 @@ namespace NibulonTest.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("dataList", "GrainData");
         }
 
         public IActionResult Privacy()
